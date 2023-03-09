@@ -36,17 +36,25 @@ public class CompanyController {
 	public ResponseEntity<Map<String, Object>> getById(@PathVariable Integer id) {
 		return ResponseEntity.ok(service.getCompanyById(id));
 	}
-
+	
 	@GetMapping("/company/list")
 	public ResponseEntity<List<Map<String, Object>>> list() {
-		return ResponseEntity.ok(service.getAllCompanies());
+		return ResponseEntity.ok(service.getAllCompanyContacts());
 	}
-
+	
 	@DeleteMapping("/company/delete/{id}")
 	public ResponseEntity<Void> delete(@PathVariable int id) {
 		service.deleteCompany(id);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
+
+
+	@GetMapping("/company/details")
+	public ResponseEntity<List<Map<String, Object>>> companyList() {
+		return ResponseEntity.ok(service.getAllCompanies());
+	}
+
+	
 
 	@GetMapping("/company/contacts/{code}")
 	public ResponseEntity<Map<String, Object>> getAllContantsOfCompany(@PathVariable String code) {
@@ -56,5 +64,10 @@ public class CompanyController {
 	@GetMapping("/company/getbycode/{code}")
 	public ResponseEntity<Map<String, Object>> getByCode(@PathVariable String code) {
 		return ResponseEntity.ok(service.findByCode(code));
+	}
+	
+	@GetMapping("/company/test")
+	public ResponseEntity<List<Map<String, Object>>> test() {
+		return ResponseEntity.ok(service.getCompanyContacts());
 	}
 }

@@ -9,6 +9,7 @@ import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -71,12 +72,7 @@ public class ContactService {
 		List<Contact> contacts = contactRepository.findByCompanyId(id);
 		List<Map<String, Object>> resData = new LinkedList<Map<String, Object>>();
 		for (Contact contact : contacts) {
-			Company company = contact.getCompany();
-			if (company != null) {
-				company = companyRepository.findById(company.getId()).orElse(null);
-				contact.setCompany(company);
 				resData.add(objectToMap(contact));
-			}
 		}
 		return resData;
 	}
@@ -162,5 +158,4 @@ public class ContactService {
 		resData.put("gender", contact.getGender());
 		return resData;
 	}
-
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.zeroco.core.pojo.Contact;
 import de.zeroco.core.service.ContactService;
 
 @RestController
@@ -33,15 +34,9 @@ public class ContactController {
 		return ResponseEntity.ok(contacts);
 	}
 
-	@GetMapping("/contact/companyid/{id}")
-	public ResponseEntity<List<Map<String, Object>>> getContactsByCompanyId(@PathVariable int id) {
-		List<Map<String, Object>> contacts = contactService.getContactsByCompanyId(id);
-		return new ResponseEntity<>(contacts, HttpStatus.OK);
-	}
-
 	@PutMapping("/contact/update/{id}")
-	public ResponseEntity<Map<String, Object>> update(@PathVariable int id, @RequestBody Map<String, Object> reqData ) {
-		Map<String, Object> updatedContact = contactService.updateContact(id,reqData);
+	public ResponseEntity<Map<String, Object>> update(@PathVariable int id, @RequestBody Map<String, Object> reqData) {
+		Map<String, Object> updatedContact = contactService.updateContact(id, reqData);
 		return new ResponseEntity<>(updatedContact, HttpStatus.OK);
 	}
 
@@ -50,11 +45,16 @@ public class ContactController {
 		contactService.deleteContact(id);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
-	
-	@PutMapping("/contact/sort")
-	public ResponseEntity<List<Map<String, Object>>> sorting(@RequestBody Map<String, Object> reqData ) {
-		List<Map<String, Object>> contacts = contactService.sorting(reqData);
+
+	@GetMapping("/contact/companyid/{id}")
+	public ResponseEntity<List<Map<String, Object>>> getContactsByCompanyId(@PathVariable int id) {
+		List<Map<String, Object>> contacts = contactService.getContactsByCompanyId(id);
 		return new ResponseEntity<>(contacts, HttpStatus.OK);
 	}
 
+	@PutMapping("/contact/sort")
+	public ResponseEntity<List<Map<String, Object>>> sorting(@RequestBody Map<String, Object> reqData) {
+		List<Map<String, Object>> contacts = contactService.sorting(reqData);
+		return new ResponseEntity<>(contacts, HttpStatus.OK);
+	}
 }

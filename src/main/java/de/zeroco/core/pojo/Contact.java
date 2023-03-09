@@ -16,12 +16,15 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name ="contact")
 public class Contact {
 	
 	@ManyToOne(targetEntity = Company.class,cascade = CascadeType.DETACH)
 	@JoinColumn(name = "company_id" , referencedColumnName = "pk_id")
+	@JsonIgnore
 	private Company company; 
 	
 	@Id

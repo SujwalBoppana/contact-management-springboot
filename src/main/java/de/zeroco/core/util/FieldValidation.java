@@ -6,7 +6,7 @@ public class FieldValidation {
 	
 	public static String required(Map<String, Object> reqData, String... keys) {
 		if (reqData == null || keys == null || keys.length == 0)
-			return null;
+			return "required fields are missing";
 		for (String key : keys) {
 			Object value = reqData.get(key);
 			if (value == null || value.toString().trim().equals(""))

@@ -128,4 +128,28 @@ public class CompanyService {
 		resData.put("contacts", contants);
 		return resData;
 	}
+	
+	public List<Map<String, Object>> getAllCompanyContacts() {
+		List<Company> companys = companyRepository.findAll();
+		List<Map<String, Object>> resData = new LinkedList<Map<String,Object>>();
+		for (Company company : companys) {
+			List<Contact> contacts = contactRepository.findByCompanyId(company.getId());
+			Map<String, Object> companyData = objectToMap(company);
+			companyData.put("contacts", contacts);
+			resData.add(companyData);
+		}
+		return resData;
+	}
+	
+	public List<Map<String, Object>> getCompanyContacts() {
+		List<Company> companys = companyRepository.findAll();
+		List<Map<String, Object>> resData = new LinkedList<Map<String,Object>>();
+		for (Company company : companys) {
+			List<Map<String, Object>> contacts = contactRepository.getMapByCompanyId(company.getId());
+			Map<String, Object> companyData = objectToMap(company);
+			companyData.put("contacts", contacts);
+			resData.add(companyData);
+		}
+		return resData;
+	}
 }

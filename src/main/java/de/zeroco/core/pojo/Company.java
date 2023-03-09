@@ -23,8 +23,8 @@ public class Company {
 	@Column(name = "pk_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
-	
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+
+	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Contact> contacts;
 
 	private String name;
