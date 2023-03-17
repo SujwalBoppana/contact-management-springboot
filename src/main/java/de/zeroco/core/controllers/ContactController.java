@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.zeroco.core.pojo.Contact;
 import de.zeroco.core.service.ContactService;
 
 @RestController
@@ -47,8 +46,8 @@ public class ContactController {
 	}
 
 	@GetMapping("/contact/companyid/{id}")
-	public ResponseEntity<List<Map<String, Object>>> getContactsByCompanyId(@PathVariable int id) {
-		List<Map<String, Object>> contacts = contactService.getContactsByCompanyId(id);
+	public ResponseEntity<Map<String, Object>> getContactsByCompanyId(@PathVariable int id) {
+		Map<String, Object> contacts = contactService.getContactsByCompanyId(id);
 		return new ResponseEntity<>(contacts, HttpStatus.OK);
 	}
 

@@ -9,15 +9,15 @@ import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import de.zeroco.core.dao.CompanyRepository;
-import de.zeroco.core.dao.ContactRepository;
+import de.zeroco.core.base.ControlKit;
 import de.zeroco.core.pojo.Company;
 import de.zeroco.core.pojo.Contact;
+import de.zeroco.core.repository.CompanyRepository;
+import de.zeroco.core.repository.ContactRepository;
 import de.zeroco.core.util.FieldValidation;
 import de.zeroco.core.util.Utility;
 
@@ -30,23 +30,23 @@ public class ContactService {
 	@Autowired
 	private CompanyRepository companyRepository;
 
-	private Map<String, Object> reqData;
-
 	public Map<String, Object> createContact(Map<String, Object> reqData) {
-		this.reqData = reqData;
-		Company company = companyRepository.findByCode(param("code"));
+		ControlKit controlKit = new ControlKit(reqData);
+		Company company = companyRepository.findByCode(controlKit.param("code"));
 		if (company == null)
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found");
 		else {
-			if (FieldValidation.required(reqData, "name", "email", "phone", "dob","gender","code") == null) {
-				if (Utility.isValidEmail(param("email")) && Utility.isValidMoblieNo(param("phone"))) {
-			Contact contact = new Contact(param("name"), param("email"), param("phone"),
-					Utility.stringToDate(param("dob")), Utility.ageCalculator(param("dob")), param("address"),
-					param("gender"), company);
-			return objectToMap(contactRepository.save(contact));
-				}else 
+			if (FieldValidation.required(reqData, "name", "email", "phone", "dob", "gender", "code") == null) {
+				if (Utility.isValidEmail(controlKit.param("email"))
+						&& Utility.isValidMoblieNo(controlKit.param("phone"))) {
+					Contact contact = new Contact(controlKit.param("name"), controlKit.param("email"),
+							controlKit.param("phone"), Utility.stringToDate(controlKit.param("dob")),
+							Utility.ageCalculator(controlKit.param("dob")), controlKit.param("address"),
+							controlKit.param("gender"), company);
+					return Utility.objectToMap(contactRepository.save(contact));
+				} else
 					throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Enter a valid Email or phone Number");
-			}else
+			} else
 				throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Required fields are missing");
 		}
 	}
@@ -55,7 +55,7 @@ public class ContactService {
 		Optional<Contact> optionalContact = contactRepository.findById(id);
 		if (optionalContact.isPresent()) {
 			Contact contact = optionalContact.get();
-			return objectToMap(contact);
+			return Utility.objectToMap(contact);
 		}
 		throw new EntityNotFoundException("Contact with id " + id + " not found");
 	}
@@ -63,40 +63,46 @@ public class ContactService {
 	public List<Map<String, Object>> getAllContacts() {
 		List<Map<String, Object>> resData = new LinkedList<Map<String, Object>>();
 		for (Contact contact : contactRepository.findAll()) {
-			resData.add(objectToMap(contact));
+			resData.add(Utility.objectToMap(contact));
 		}
 		return resData;
 	}
 
-	public List<Map<String, Object>> getContactsByCompanyId(Integer id) {
-		List<Contact> contacts = contactRepository.findByCompanyId(id);
-		List<Map<String, Object>> resData = new LinkedList<Map<String, Object>>();
-		for (Contact contact : contacts) {
-				resData.add(objectToMap(contact));
+	public Map<String, Object> getContactsByCompanyId(Integer id) {
+		Optional<Company> optionalCompany = companyRepository.findById(id);
+		if (optionalCompany.isPresent()) {
+			Company company = optionalCompany.get();
+			List<Contact> contacts = contactRepository.findByCompanyId(id);
+			Map<String, Object> resData = new LinkedHashMap<String, Object>();
+			resData.put("company", Utility.objectToMap(company));
+			resData.put("contacts", contacts);
+			return resData;
+		} else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Company id is not present!. please try again");
 		}
-		return resData;
 	}
 
 	public Map<String, Object> updateContact(Integer id, Map<String, Object> reqData) {
 		Optional<Contact> optionalContact = contactRepository.findById(id);
+		ControlKit controlKit = new ControlKit(reqData);
 		if (optionalContact.isPresent()) {
-			this.reqData = reqData;
-			if (FieldValidation.required(reqData, "name", "email", "phone", "dob", "gender","code") == null) {
-				if (Utility.isValidEmail(param("email")) && Utility.isValidMoblieNo(param("phone"))) {
+			if (FieldValidation.required(reqData, "name", "email", "phone", "dob", "gender", "code") == null) {
+				if (Utility.isValidEmail(controlKit.param("email"))
+						&& Utility.isValidMoblieNo(controlKit.param("phone"))) {
 					Contact contact = optionalContact.get();
-					Company company = companyRepository.findByCode(param("code"));
-					contact.setName(param("name"));
-					contact.setEmail(param("email"));
-					contact.setPhone(param("phone"));
-					contact.setDob(Utility.stringToDate(param("dob")));
-					contact.setAddress(param("address"));
-					contact.setGender(param("gender"));
+					Company company = companyRepository.findByCode(controlKit.param("code"));
+					contact.setName(controlKit.param("name"));
+					contact.setEmail(controlKit.param("email"));
+					contact.setPhone(controlKit.param("phone"));
+					contact.setDob(Utility.stringToDate(controlKit.param("dob")));
+					contact.setAddress(controlKit.param("address"));
+					contact.setGender(controlKit.param("gender"));
 					contact.setCompany(company);
-					contact.setAge(Utility.ageCalculator(param("dob")));
-					return objectToMap(contactRepository.save(contact));
-				}else 
+					contact.setAge(Utility.ageCalculator(controlKit.param("dob")));
+					return Utility.objectToMap(contactRepository.save(contact));
+				} else
 					throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Enter a valid Email or phone Number");
-			}else 
+			} else
 				throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Required fields are missing");
 		}
 		throw new EntityNotFoundException("Contact with id " + id + " not found");
@@ -112,20 +118,30 @@ public class ContactService {
 	}
 
 	public List<Contact> sortList(Map<String, Object> reqData) {
-		this.reqData = reqData;
-		int age = Integer.parseInt(param("age"));
-		if (param("type").equalsIgnoreCase("equal")) {
+		ControlKit controlKit = new ControlKit(reqData);
+		int age = Integer.parseInt(controlKit.param("age"));
+		String type = controlKit.param("type");
+		String order = controlKit.param("order");
+		if (type.equalsIgnoreCase("equal")) {
 			return contactRepository.findByAge(age);
-		} else if (param("order").equalsIgnoreCase("desc")) {
-			if (param("type").equalsIgnoreCase("greaterthanorequal")) return contactRepository.findByAgeGreaterThanEqualOrderByAgeDesc(age);
-			else if (param("type").equalsIgnoreCase("greaterthan")) return contactRepository.findByAgeGreaterThanOrderByAgeDesc(age);
-			else if (param("type").equalsIgnoreCase("lessthanorequal")) return contactRepository.findByAgeLessThanEqualOrderByAgeDesc(age);
-			else if (param("type").equalsIgnoreCase("lessthan")) return contactRepository.findByAgeLessThanOrderByAgeDesc(age);
-		} else if (param("order").equalsIgnoreCase("asc")) {
-			if (param("type").equalsIgnoreCase("lessthanorequal")) return contactRepository.findByAgeLessThanEqualOrderByAgeAsc(age);
-			else if (param("type").equalsIgnoreCase("lessthan")) return contactRepository.findByAgeLessThanOrderByAgeAsc(age);
-			else if (param("type").equalsIgnoreCase("greaterthanorequal")) return contactRepository.findByAgeGreaterThanEqualOrderByAgeAsc(age);
-			else if (param("type").equalsIgnoreCase("greaterthan")) return contactRepository.findByAgeGreaterThanOrderByAgeAsc(age);
+		} else if (order.equalsIgnoreCase("desc")) {
+			if (type.equalsIgnoreCase("greaterthanorequal"))
+				return contactRepository.findByAgeGreaterThanEqualOrderByAgeDesc(age);
+			else if (type.equalsIgnoreCase("greaterthan"))
+				return contactRepository.findByAgeGreaterThanOrderByAgeDesc(age);
+			else if (type.equalsIgnoreCase("lessthanorequal"))
+				return contactRepository.findByAgeLessThanEqualOrderByAgeDesc(age);
+			else if (type.equalsIgnoreCase("lessthan"))
+				return contactRepository.findByAgeLessThanOrderByAgeDesc(age);
+		} else if (order.equalsIgnoreCase("asc")) {
+			if (type.equalsIgnoreCase("lessthanorequal"))
+				return contactRepository.findByAgeLessThanEqualOrderByAgeAsc(age);
+			else if (type.equalsIgnoreCase("lessthan"))
+				return contactRepository.findByAgeLessThanOrderByAgeAsc(age);
+			else if (type.equalsIgnoreCase("greaterthanorequal"))
+				return contactRepository.findByAgeGreaterThanEqualOrderByAgeAsc(age);
+			else if (type.equalsIgnoreCase("greaterthan"))
+				return contactRepository.findByAgeGreaterThanOrderByAgeAsc(age);
 		}
 		return null;
 	}
@@ -133,29 +149,8 @@ public class ContactService {
 	public List<Map<String, Object>> sorting(Map<String, Object> reqData) {
 		List<Map<String, Object>> resData = new LinkedList<Map<String, Object>>();
 		for (Contact contact : sortList(reqData)) {
-			resData.add(objectToMap(contact));
+			resData.add(Utility.objectToMap(contact));
 		}
-		return resData;
-	}
-
-	public String param(String key) {
-		Object object = reqData.get(key);
-		return object == null ? null : object.toString().trim();
-	}
-
-	public Map<String, Object> objectToMap(Contact contact) {
-		if (contact == null)
-			return null;
-		Map<String, Object> resData = new LinkedHashMap<String, Object>();
-		resData.put("company", contact.getCompany());
-		resData.put("id", contact.getId());
-		resData.put("name", contact.getName());
-		resData.put("email", contact.getEmail());
-		resData.put("phone", contact.getPhone());
-		resData.put("address", contact.getAddress());
-		resData.put("dob", contact.getDob());
-		resData.put("age", contact.getAge());
-		resData.put("gender", contact.getGender());
 		return resData;
 	}
 }

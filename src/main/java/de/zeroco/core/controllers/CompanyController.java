@@ -54,18 +54,6 @@ public class CompanyController {
 		return ResponseEntity.ok(service.getAllCompanies());
 	}
 
-	
-
-	@GetMapping("/company/contacts/{code}")
-	public ResponseEntity<Map<String, Object>> getAllContantsOfCompany(@PathVariable String code) {
-		return ResponseEntity.ok(service.getCompanyContacts(code));
-	}
-
-	@GetMapping("/company/getbycode/{code}")
-	public ResponseEntity<Map<String, Object>> getByCode(@PathVariable String code) {
-		return ResponseEntity.ok(service.findByCode(code));
-	}
-	
 	@GetMapping("/company/test")
 	public ResponseEntity<List<Map<String, Object>>> test() {
 		return ResponseEntity.ok(service.getCompanyContacts());

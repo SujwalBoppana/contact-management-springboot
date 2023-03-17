@@ -9,8 +9,14 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.zeroco.core.pojo.Company;
+import de.zeroco.core.pojo.Contact;
 
 public class Utility {
 	/**
@@ -124,4 +130,41 @@ public class Utility {
 		if (isBlank(input)) return false;
 		return Pattern.compile("[6-9][0-9]{9}").matcher(input).find();
 	}
+	
+	public static Map<String, Object> objectToMap(Company company) {
+		if (company == null)
+			return null;
+		Map<String, Object> resData = new LinkedHashMap<String, Object>();
+		resData.put("id", company.getId());
+		resData.put("name", company.getName());
+		resData.put("code", company.getCode());
+		resData.put("email", company.getEmail());
+		resData.put("phone", company.getPhone());
+		resData.put("website", company.getWebsite());
+		resData.put("address", company.getAddress());
+		return resData;
+	}
+	
+	public static Map<String, Object> objectToMap(Contact contact) {
+		if (contact == null)
+			return null;
+		Map<String, Object> resData = new LinkedHashMap<String, Object>();
+		resData.put("company", contact.getCompany());
+		resData.put("id", contact.getId());
+		resData.put("name", contact.getName());
+		resData.put("email", contact.getEmail());
+		resData.put("phone", contact.getPhone());
+		resData.put("address", contact.getAddress());
+		resData.put("dob", contact.getDob());
+		resData.put("age", contact.getAge());
+		resData.put("gender", contact.getGender());
+		return resData;
+	}
+	
+	public Map<String, Object> objectToMap(Object obj) {
+		ObjectMapper oMapper = new ObjectMapper();
+		return oMapper.convertValue(obj, Map.class);
+	}
+	
+	
 }

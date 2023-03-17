@@ -1,4 +1,4 @@
-package de.zeroco.core.dao;
+package de.zeroco.core.repository;
 
 import java.util.List;
 import java.util.Map;
